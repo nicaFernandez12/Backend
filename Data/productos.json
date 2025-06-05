@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "title": "Zapatillas",
+    "description": "Zapatillas negras",
+    "price": 20,
+    "thumbnail": [],
+    "code": 1234,
+    "stock": 60,
+    "status": true,
+    "category": "Calzado"
+  }
+]
