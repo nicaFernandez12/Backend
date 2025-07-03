@@ -1,0 +1,385 @@
+<!-- Notificaciones -->
+<div id="notification" class="alert alert-dismissible position-fixed top-0 end-0 m-3" style="display: none; z-index: 1050;">
+    <span id="notificationMessage"></span>
+    <button type="button" class="btn-close" onclick="hideNotification()"></button>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="display-4">
+                <i class="fas fa-sync-alt"></i> Productos en Tiempo Real
+            </h1>
+            <div id="socketStatus" class="text-success">
+                <i class="fas fa-wifi"></i> Conectando...
+            </div>
+        </div>
+
+        <!-- Formulario para agregar productos -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-plus-circle"></i> Agregar Nuevo Producto
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="productForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="title" name="title"
+                                            placeholder="Título" required>
+                                        <label for="title"><i class="fas fa-tag"></i> Título</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="code" name="code"
+                                            placeholder="Código" required>
+                                        <label for="code"><i class="fas fa-barcode"></i> Código</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <div class="form-floating">
+                                        <textarea class="form-control" id="description" name="description"
+                                            placeholder="Descripción" style="height: 100px" required></textarea>
+                                        <label for="description"><i class="fas fa-align-left"></i> Descripción</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="price" name="price"
+                                            placeholder="Precio" step="0.01" required>
+                                        <label for="price"><i class="fas fa-dollar-sign"></i> Precio</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="stock" name="stock"
+                                            placeholder="Stock" required>
+                                        <label for="stock"><i class="fas fa-boxes"></i> Stock</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="category" name="category"
+                                            placeholder="Categoría" required>
+                                        <label for="category"><i class="fas fa-folder"></i> Categoría</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="thumbnail" name="thumbnail"
+                                            placeholder="URL de imagen" required>
+                                        <label for="thumbnail"><i class="fas fa-image"></i> URL de imagen</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-floating">
+                                        <select class="form-select" id="status" name="status" required>
+                                            <option value="">Seleccionar estado</option>
+                                            <option value="true">Activo</option>
+                                            <option value="false">Inactivo</option>
+                                        </select>
+                                        <label for="status"><i class="fas fa-toggle-on"></i> Estado</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-plus"></i> Agregar Producto
+                                    </button>
+                                    <button type="reset" class="btn btn-secondary btn-lg ms-2">
+                                        <i class="fas fa-trash"></i> Limpiar
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de productos -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-list"></i> Lista de Productos
+                            <span class="badge bg-light text-dark ms-2" id="productCount">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="productsList" class="row">
+                            <!-- Los productos se cargarán aquí dinámicamente -->
+                        </div>
+                        <div id="noProductsMessage" class="text-center text-muted" style="display: none;">
+                            <i class="fas fa-inbox fa-3x mb-3"></i>
+                            <h4>No hay productos disponibles</h4>
+                            <p>Agrega tu primer producto usando el formulario de arriba.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .product-card {
+        transition: transform 0.2s ease-in-out;
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .fade-in {
+        animation: fadeIn 0.5s ease-in;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .price-badge {
+        font-size: 1.1em;
+        font-weight: bold;
+    }
+    
+    .stock-badge {
+        font-size: 0.9em;
+    }
+    
+    .socket-connected {
+        color: #28a745 !important;
+    }
+    
+    .socket-disconnected {
+        color: #dc3545 !important;
+    }
+</style>
+
+<script>
+    const socket = io();
+    
+    // Elementos del DOM
+    const productForm = document.getElementById('productForm');
+    const productsList = document.getElementById('productsList');
+    const noProductsMessage = document.getElementById('noProductsMessage');
+    const productCount = document.getElementById('productCount');
+    const socketStatus = document.getElementById('socketStatus');
+    const notification = document.getElementById('notification');
+    const notificationMessage = document.getElementById('notificationMessage');
+
+    // Estado de conexión
+    socket.on('connect', () => {
+        console.log('Conectado al servidor');
+        socketStatus.className = 'text-success';
+        socketStatus.innerHTML = '<i class="fas fa-wifi"></i> Conectado con WebSockets';
+
+        // Solicitar productos al conectar
+        socket.emit('requestProducts');
+    });
+
+    socket.on('disconnect', () => {
+        console.log('Desconectado del servidor');
+        socketStatus.className = 'text-danger';
+        socketStatus.innerHTML = '<i class="fas fa-wifi"></i> Desconectado';
+    });
+
+    // Eventos de productos
+    socket.on('updateProducts', (products) => {
+        console.log('Productos recibidos:', products);
+        renderProducts(products);
+    });
+
+    socket.on('productAdded', (data) => {
+        console.log('Producto agregado:', data);
+        renderProducts(data.allProducts);
+        showNotification(`Producto "${data.product.title}" agregado exitosamente`, 'success');
+    });
+
+    socket.on('productUpdated', (data) => {
+        console.log('Producto actualizado:', data);
+        renderProducts(data.allProducts);
+        showNotification(`Producto "${data.product.title}" actualizado exitosamente`, 'info');
+    });
+
+    socket.on('productDeleted', (data) => {
+        console.log('Producto eliminado:', data);
+        renderProducts(data.allProducts);
+        showNotification(`Producto "${data.product.title}" eliminado exitosamente`, 'warning');
+    });
+
+    socket.on('productCreated', (data) => {
+        console.log('Respuesta de creación:', data);
+        if (data.success) {
+            productForm.reset();
+            showNotification(data.message, 'success');
+        } else {
+            showNotification(data.message, 'danger');
+        }
+    });
+
+    socket.on('error', (error) => {
+        console.error('Error del socket:', error);
+        showNotification(`Error: ${error}`, 'danger');
+    });
+
+    // Manejar envío del formulario
+    productForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        console.log('Formulario enviado');
+
+        const formData = new FormData(productForm);
+        const productData = {
+            title: formData.get('title'),
+            code: formData.get('code'),
+            description: formData.get('description'),
+            price: parseFloat(formData.get('price')),
+            stock: parseInt(formData.get('stock')),
+            category: formData.get('category'),
+            thumbnail: formData.get('thumbnail'),
+            status: formData.get('status') === 'true'
+        };
+
+        console.log('Datos del producto a enviar:', productData);
+
+        // Enviar producto vía WebSocket
+        socket.emit('createProduct', productData);
+    });
+
+    // Función para renderizar productos
+    function renderProducts(products) {
+        console.log('Renderizando productos:', products);
+        productsList.innerHTML = '';
+        productCount.textContent = products.length;
+
+        if (products.length === 0) {
+            noProductsMessage.style.display = 'block';
+            return;
+        }
+
+        noProductsMessage.style.display = 'none';
+
+        products.forEach(product => {
+            const productCard = document.createElement('div');
+            productCard.className = 'col-md-6 col-lg-4 mb-4';
+            productCard.innerHTML = `
+                <div class="card product-card shadow-sm h-100 fade-in">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-tag"></i> ${product.title}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-8">
+                                <span class="badge bg-success price-badge">
+                                    <i class="fas fa-dollar-sign"></i> $${product.price}
+                                </span>
+                            </div>
+                            <div class="col-4 text-end">
+                                <span class="badge bg-info stock-badge">
+                                    <i class="fas fa-boxes"></i> ${product.stock}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <p class="card-text text-muted">
+                            <i class="fas fa-align-left"></i> ${product.description}
+                        </p>
+                        
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    <i class="fas fa-barcode"></i> <strong>Código:</strong> ${product.code}
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    <i class="fas fa-folder"></i> <strong>Categoría:</strong> ${product.category}
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <span class="badge ${product.status ? 'bg-success' : 'bg-secondary'}">
+                                    <i class="fas ${product.status ? 'fa-check-circle' : 'fa-times-circle'}"></i> 
+                                    ${product.status ? 'Activo' : 'Inactivo'}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-12">
+                                <small class="text-muted">
+                                    <i class="fas fa-image"></i> <strong>Imagen:</strong> 
+                                    <a href="${product.thumbnail}" target="_blank" class="text-decoration-none">Ver imagen</a>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-hashtag"></i> ID: ${product.id}
+                        </small>
+                        <button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id})">
+                            <i class="fas fa-trash"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            `;
+            productsList.appendChild(productCard);
+        });
+    }
+
+    // Función para eliminar producto
+    function deleteProduct(productId) {
+        if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
+            console.log('Eliminando producto:', productId);
+            socket.emit('deleteProduct', parseInt(productId));
+        }
+    }
+
+    // Función para mostrar notificaciones
+    function showNotification(message, type = 'info') {
+        notification.className = `alert alert-${type} alert-dismissible position-fixed top-0 end-0 m-3`;
+        notificationMessage.textContent = message;
+        notification.style.display = 'block';
+        notification.style.zIndex = '1050';
+
+        // Auto-ocultar después de 5 segundos
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, 5000);
+    }
+
+    // Función para ocultar notificaciones
+    function hideNotification() {
+        notification.style.display = 'none';
+    }
+
+    // Solicitar productos al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('Página cargada, solicitando productos...');
+        socket.emit('requestProducts');
+    });
+</script>

@@ -1,12 +1,12 @@
 [
   {
-    "id": 1,
-    "title": "Zapatillas",
-    "description": "Zapatillas negras",
-    "price": 20,
-    "thumbnail": [],
-    "code": 1234,
-    "stock": 60,
+    "id": 3,
+    "title": "Zapas negras",
+    "description": "Zapas",
+    "price": 250000,
+    "thumbnail": "img/remeraB",
+    "code": "154",
+    "stock": 25,
     "status": true,
     "category": "Calzado"
   }

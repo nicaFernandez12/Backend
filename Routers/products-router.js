@@ -1,105 +1,111 @@
 const express = require('express');
-const path = require('path');
-const router = express.Router();
-const ProductManager = require('../Services/ProductManager');
 
-const filePath = path.join(__dirname, '../Data/productos.json');
 
-//Creo el objeto ProductManager
-const productManager = new ProductManager(filePath);
+module.exports = (productManager) => {
+    const router = express.Router();
 
-//Metodo GET de todos los products
-router.get('/', async (req, res) => {
-    try {
-        const products = await productManager.getProducts();
-        res.status(200).json(products);
-    } catch(error) {
-        const statusCode = error.statusCode || 500;
-        const errorMessage = error.message || 'Error interno inesperado'
+    //Metodo GET de todos los products
+    router.get('/', async (req, res) => {
+        try {
+            const products = await productManager.getProducts();
+            res.status(200).json(products);
+        } catch (error) {
+            const statusCode = error.statusCode || 500;
+            const errorMessage = error.message || 'Error interno inesperado'
 
-        res.status(statusCode).send({
-            message: errorMessage
-        })
-    }
-})
+            res.status(statusCode).send({
+                message: errorMessage
+            })
+        }
+    })
 
-//Metodo GET de un product específico
-router.get('/:id', async (req, res) => {
-    try {
-        const id = Number(req.params.id);
-        const product = await productManager.getProductById(id);
-        res.status(200).json(product);
+    //Metodo GET de un product específico
+    router.get('/:id', async (req, res) => {
+        try {
+            const id = Number(req.params.id);
+            const product = await productManager.getProductById(id);
+            res.status(200).json(product);
 
-    } catch(error) {
-        const statusCode = error.statusCode || 500;
-        const errorMessage = error.message || 'Error interno inesperado'
+        } catch (error) {
+            const statusCode = error.statusCode || 500;
+            const errorMessage = error.message || 'Error interno inesperado'
 
-        res.status(statusCode).send({
-            message: errorMessage
-        })
-    }
-})
+            res.status(statusCode).send({
+                message: errorMessage
+            })
+        }
+    })
 
-//Metodo POST de un product
-router.post('/', async (req,res) => {
-    try {
-        const newProduct = req.body;
-        const addedProduct = await productManager.addProduct(newProduct);
+    //Metodo POST de un product
+    router.post('/', async (req, res) => {
+        try {
+            const newProduct = req.body;
+            const addedProduct = await productManager.addProduct(newProduct);
 
-        res.status(201).send({
-            message: 'Producto agregado con exito',
-            product: addedProduct
-        });
+            const allProducts = await productManager.getProducts();
+            req.io.emit('productAdded', { product: newProduct, allProducts });
 
-    }catch(error) {
-        const statusCode = error.statusCode || 500;
-        const errorMessage = error.message || 'Error interno inesperado'
+            res.status(201).send({
+                message: 'Producto agregado con exito',
+                product: addedProduct
+            });
 
-        res.status(statusCode).send({
-            message: errorMessage
-        })
-    }
-})
+        } catch (error) {
+            const statusCode = error.statusCode || 500;
+            const errorMessage = error.message || 'Error interno inesperado'
 
-//Metodo PUT de un product
-router.put('/:id', async (req, res) => {
-    try {
-        const id = Number(req.params.id);
-        const newProduct = req.body;
+            res.status(statusCode).send({
+                message: errorMessage
+            })
+        }
+    })
 
-        const resultado = await productManager.updateProduct(id, newProduct);
+    //Metodo PUT de un product
+    router.put('/:id', async (req, res) => {
+        try {
+            const id = Number(req.params.id);
+            const newProduct = req.body;
 
-        res.status(200).json(resultado);
+            const resultado = await productManager.updateProduct(id, newProduct);
 
-    }catch (error){
-        const statusCode = error.statusCode || 500;
-        const errorMessage = error.message || 'Error interno inesperado'
+            const allProducts = await productManager.getProducts();
+            req.io.emit('productUpdated', { product: updatedProduct, allProducts });
 
-        res.status(statusCode).send({
-            message: errorMessage
-        })
-    }
-})
+            res.status(200).json(resultado);
 
-//Metodo DELETE de un product
-router.delete('/:id', async (req, res) => {
-    try {
-        const id = Number(req.params.id);
+        } catch (error) {
+            const statusCode = error.statusCode || 500;
+            const errorMessage = error.message || 'Error interno inesperado'
 
-        const resultado = await productManager.deleteProduct(id);
+            res.status(statusCode).send({
+                message: errorMessage
+            })
+        }
+    })
 
-        res.send({
-            message: 'Producto eliminado con exito',
-            product: resultado
-        })
-    } catch(error) {
-        const statusCode = error.statusCode || 500;
-        const errorMessage = error.message || 'Error interno inesperado'
+    //Metodo DELETE de un product
+    router.delete('/:id', async (req, res) => {
+        try {
+            const id = Number(req.params.id);
 
-        res.status(statusCode).send({
-            message: errorMessage
-        })
-    }
-})
+            const resultado = await productManager.deleteProduct(id);
 
-module.exports = router;
+            const allProducts = await productManager.getProducts();
+            req.io.emit('productDeleted', { product: deletedProduct, allProducts });
+
+            res.send({
+                message: 'Producto eliminado con exito',
+                product: resultado
+            })
+        } catch (error) {
+            const statusCode = error.statusCode || 500;
+            const errorMessage = error.message || 'Error interno inesperado'
+
+            res.status(statusCode).send({
+                message: errorMessage
+            })
+        }
+    })
+
+    return router;
+}
