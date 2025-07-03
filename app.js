@@ -8,10 +8,10 @@ const app = express();
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  cors: {
-    origin: "*", // Permite todos los orígenes (ajusta en producción)
-    methods: ["GET", "POST"]
-  }
+    cors: {
+        origin: "*", // Permite todos los orígenes (ajusta en producción)
+        methods: ["GET", "POST"]
+    }
 });
 
 // Importar ProductManager
@@ -32,7 +32,7 @@ app.engine('handlebars', engine({
     layoutsDir: path.join(__dirname, 'views/layouts'),
     partialsDir: path.join(__dirname, 'views/partials'),
     helpers: {
-        json: function(context) {
+        json: function (context) {
             return JSON.stringify(context);
         }
     }
@@ -103,6 +103,7 @@ io.on('connection', (socket) => {
             socket.emit('productDeleted', {
                 success: true,
                 product: deletedProduct,
+                allProducts: allProducts,
                 message: 'Producto eliminado exitosamente'
             });
         } catch (error) {

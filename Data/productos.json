@@ -1,13 +1,13 @@
 [
   {
-    "id": 3,
-    "title": "Zapas negras",
-    "description": "Zapas",
-    "price": 250000,
-    "thumbnail": "img/remeraB",
-    "code": "154",
-    "stock": 25,
+    "id": 1,
+    "title": "Remera",
+    "description": "Remerita facha",
+    "price": 2,
+    "thumbnail": "img/zapasN",
+    "code": "134",
+    "stock": 2,
     "status": true,
-    "category": "Calzado"
+    "category": "Remera"
   }
 ]
