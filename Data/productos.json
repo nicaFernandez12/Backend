@@ -9,5 +9,16 @@
     "stock": 2,
     "status": true,
     "category": "Remera"
+  },
+  {
+    "id": 2,
+    "title": "Zapatillas",
+    "description": "Zapas negras re buenisimas",
+    "price": 25,
+    "thumbnail": "img/zapasN",
+    "code": "1254",
+    "stock": 200,
+    "status": true,
+    "category": "Calzado"
   }
 ]

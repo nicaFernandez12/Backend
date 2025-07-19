@@ -3,6 +3,15 @@ const { createServer } = require('http');
 const { Server } = require('socket.io');
 const { engine } = require('express-handlebars');
 const path = require('path');
+const mongoose = require('mongoose');
+
+mongoose.connect("mongodb+srv://nicanorfg80:GGkNQrKi74c95HP5@cluster0.uk7rclc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+.then(() => {
+    console.log("BD conectada correctamente")
+})
+.catch((error) => {
+    console.error("Error en la conexión", error)}
+)
 
 const app = express();
 
