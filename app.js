@@ -6,12 +6,13 @@ const path = require('path');
 const mongoose = require('mongoose');
 
 mongoose.connect("mongodb+srv://nicanorfg80:GGkNQrKi74c95HP5@cluster0.uk7rclc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-.then(() => {
-    console.log("BD conectada correctamente")
-})
-.catch((error) => {
-    console.error("Error en la conexión", error)}
-)
+    .then(() => {
+        console.log("BD conectada correctamente")
+    })
+    .catch((error) => {
+        console.error("Error en la conexión", error)
+    }
+    )
 
 const app = express();
 
@@ -43,6 +44,40 @@ app.engine('handlebars', engine({
     helpers: {
         json: function (context) {
             return JSON.stringify(context);
+        },
+        eq: function (a, b, options) {
+            if (arguments.length < 3) {
+                throw new Error('Helper eq necesita exactamente 2 argumentos');
+            }
+            return a === b;
+        },
+        ne: function (a, b) {
+            return a !== b;
+        },
+        gt: function (a, b) {
+            return a > b;
+        },
+        lt: function (a, b) {
+            return a < b;
+        },
+        substring: function (str, start, end) {
+            // Verificaciones de seguridad
+            if (str === null || str === undefined) {
+                return ''; // Retorna cadena vacía si el valor es nulo/undefined
+            }
+
+            // Asegurarnos que es string (por si viene un número u otro tipo)
+            str = String(str);
+
+            // Convertir parámetros a números enteros
+            start = parseInt(start) || 0;
+            end = parseInt(end) || str.length;
+
+            // Ajustar los valores para que estén dentro de los límites
+            start = Math.max(0, start);
+            end = Math.min(Math.max(start, end), str.length);
+
+            return str.substring(start, end);;
         }
     }
 }));
@@ -71,7 +106,8 @@ io.on('connection', (socket) => {
     // Enviar lista de productos al cliente recién conectado
     socket.on('requestProducts', async () => {
         try {
-            const products = await productManager.getProducts();
+            const productsData = await productManager.getProducts(50, 1);
+            const products = productsData.payload;
             socket.emit('updateProducts', products);
         } catch (error) {
             socket.emit('error', error.message);
@@ -82,7 +118,8 @@ io.on('connection', (socket) => {
     socket.on('createProduct', async (productData) => {
         try {
             const newProduct = await productManager.addProduct(productData);
-            const allProducts = await productManager.getProducts();
+            const productsData = await productManager.getProducts(50, 1);
+            const allProducts = productsData.payload
 
             // Emitir a todos los clientes conectados
             io.emit('productAdded', { product: newProduct, allProducts });
@@ -104,7 +141,8 @@ io.on('connection', (socket) => {
     socket.on('deleteProduct', async (productId) => {
         try {
             const deletedProduct = await productManager.deleteProduct(productId);
-            const allProducts = await productManager.getProducts();
+            const productsData = await productManager.getProducts(50, 1);
+            const allProducts = productsData.payload
 
             // Emitir a todos los clientes conectados
             io.emit('productDeleted', { product: deletedProduct, allProducts });

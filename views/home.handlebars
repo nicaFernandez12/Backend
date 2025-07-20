@@ -1,164 +1,302 @@
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1 class="display-4">
-                <i class="fas fa-boxes"></i> Lista de Productos
-            </h1>
-            <div class="text-muted">
-                <i class="fas fa-info-circle"></i> Vista estática
-            </div>
-        </div>
-        
-        {{#if error}}
-            <div class="alert alert-danger" role="alert">
-                <i class="fas fa-exclamation-triangle"></i> Error: {{error}}
-            </div>
-        {{/if}}
-        
-        {{#if hasProducts}}
-            <div class="row mb-3">
-                <div class="col-12">
-                    <div class="alert alert-info" role="alert">
-                        <i class="fas fa-lightbulb"></i> 
-                        <strong>¿Quieres ver los productos actualizándose en tiempo real?</strong> 
-                        <a href="/realtimeproducts" class="alert-link">Ir a la vista en tiempo real</a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row">
-                {{#each products}}
-                    <div class="col-md-6 col-lg-4 mb-4">
-                        <div class="card product-card shadow-sm h-100">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-tag"></i> {{this.title}}
-                                </h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="row mb-3">
-                                    <div class="col-8">
-                                        <span class="badge bg-success price-badge">
-                                            <i class="fas fa-dollar-sign"></i> ${{this.price}}
-                                        </span>
-                                    </div>
-                                    <div class="col-4 text-end">
-                                        <span class="badge bg-info stock-badge">
-                                            <i class="fas fa-boxes"></i> {{this.stock}}
-                                        </span>
-                                    </div>
-                                </div>
-                                
-                                <p class="card-text text-muted">
-                                    <i class="fas fa-align-left"></i> {{this.description}}
-                                </p>
-                                
-                                <div class="row mb-2">
-                                    <div class="col-12">
-                                        <small class="text-muted">
-                                            <i class="fas fa-barcode"></i> <strong>Código:</strong> {{this.code}}
-                                        </small>
-                                    </div>
-                                </div>
-                                
-                                {{#if this.category}}
-                                    <div class="row mb-2">
-                                        <div class="col-12">
-                                            <small class="text-muted">
-                                                <i class="fas fa-folder"></i> <strong>Categoría:</strong> {{this.category}}
-                                            </small>
-                                        </div>
-                                    </div>
-                                {{/if}}
-                                
-                                {{#if this.status}}
-                                    <div class="row mb-2">
-                                        <div class="col-12">
-                                            <span class="badge bg-success">
-                                                <i class="fas fa-check-circle"></i> Activo
-                                            </span>
-                                        </div>
-                                    </div>
-                                {{else}}
-                                    <div class="row mb-2">
-                                        <div class="col-12">
-                                            <span class="badge bg-secondary">
-                                                <i class="fas fa-times-circle"></i> Inactivo
-                                            </span>
-                                        </div>
-                                    </div>
-                                {{/if}}
-                                
-                                {{#if this.thumbnail}}
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <small class="text-muted">
-                                                <i class="fas fa-image"></i> <strong>Imagen:</strong> {{this.thumbnail}}
-                                            </small>
-                                        </div>
-                                    </div>
-                                {{/if}}
-                            </div>
-                            <div class="card-footer bg-light">
-                                <small class="text-muted">
-                                    <i class="fas fa-hashtag"></i> ID: {{this.id}}
-                                </small>
-                            </div>
+<div class="container mt-4">
+    <div class="row">
+        <!-- Columna de Productos -->
+        <div class="col-md-8">
+            <h2>Nuestros Productos</h2>
+
+            <!-- Formulario de Búsqueda y Ordenamiento -->
+            <form id="filter-form" class="mb-4">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="category">Categoría:</label>
+                            <input type="text" id="category" name="category" class="form-control"
+                                placeholder="Ej: Electrónica">
                         </div>
                     </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="availability">Disponibilidad:</label>
+                            <select id="availability" name="status" class="form-control">
+                                <option value="true">Disponible</option>
+                                <option value="false">Agotado</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="sort">Ordenar por Precio:</label>
+                            <select id="sort" name="sort" class="form-control">
+                                <option value="">-</option>
+                                <option value="price:asc">Ascendente</option>
+                                <option value="price:desc">Descendente</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Buscar</button>
+            </form>
+
+            <!-- Lista de Productos -->
+            <div id="product-list" class="row">
+                {{#each payload}}
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">{{this.title}}</h5>
+                            <p class="card-text">{{this.description}}</p>
+                            <p class="card-text"><strong>Precio:</strong> ${{this.price}}</p>
+                            <button class="btn btn-success add-to-cart" data-id="{{this._id}}">Agregar al
+                                Carrito</button>
+                            <button class="btn btn-info view-details" data-id="{{this._id}}" data-toggle="modal"
+                                data-target="#productModal">Ver Detalles</button>
+                        </div>
+                    </div>
+                </div>
                 {{/each}}
             </div>
-            
-            <div class="row mt-4">
-                <div class="col-12">
-                    <div class="alert alert-light border" role="alert">
-                        <div class="row">
-                            <div class="col-md-8">
-                                <h5 class="alert-heading">
-                                    <i class="fas fa-chart-bar"></i> Estadísticas
-                                </h5>
-                                <p class="mb-0">
-                                    <strong>Total de productos:</strong> {{products.length}} | 
-                                    <strong>Stock total:</strong> {{#each products}}{{this.stock}}{{#unless @last}} + {{/unless}}{{/each}}
-                                </p>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <a href="/realtimeproducts" class="btn btn-primary">
-                                    <i class="fas fa-sync-alt"></i> Ver en Tiempo Real
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+            <!-- Paginación -->
+            <nav>
+                <ul class="pagination">
+                    {{#if hasPrevPage}}
+                    <li class="page-item"><a class="page-link" href="{{prevLink}}">Anterior</a></li>
+                    {{/if}}
+                    <li class="page-item active"><a class="page-link" href="#">{{page}}</a></li>
+                    {{#if hasNextPage}}
+                    <li class="page-item"><a class="page-link" href="{{nextLink}}">Siguiente</a></li>
+                    {{/if}}
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Columna del Carrito -->
+        <div class="col-md-4">
+            <h3>Carrito de Compras</h3>
+            <div id="cart" class="border p-3">
+                <ul id="cart-items" class="list-group">
+                    <!-- Los productos del carrito se agregarán aquí dinámicamente -->
+                </ul>
+                <hr>
+                <p><strong>Total:</strong> $<span id="cart-total">0.00</span></p>
+                <button id="clear-cart" class="btn btn-danger">Vaciar Carrito</button>
             </div>
-        {{else}}
-            <div class="row">
-                <div class="col-12">
-                    <div class="alert alert-warning text-center" role="alert">
-                        <i class="fas fa-exclamation-triangle fa-3x mb-3"></i>
-                        <h4 class="alert-heading">No hay productos disponibles</h4>
-                        <p>Parece que no hay productos registrados en el sistema.</p>
-                        <hr>
-                        <p class="mb-0">
-                            <a href="/realtimeproducts" class="btn btn-primary">
-                                <i class="fas fa-plus"></i> Agregar productos en tiempo real
-                            </a>
-                        </p>
-                    </div>
-                </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Detalles del Producto -->
+<div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Detalles del Producto</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
             </div>
-        {{/if}}
+            <div class="modal-body" id="product-details-content">
+                <!-- El contenido de los detalles del producto se cargará aquí -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-    // Calcular stock total dinámicamente
-    document.addEventListener('DOMContentLoaded', function() {
-        const products = {{{json products}}};
-        if (products && products.length > 0) {
-            const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
-            console.log('Total de productos:', products.length);
-            console.log('Stock total:', totalStock);
-        }
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // --- ELEMENTOS DEL DOM ---
+         const filterForm = document.getElementById('filter-form');
+        const productList = document.getElementById('product-list');
+        const cartItemsList = document.getElementById('cart-items');
+        const cartTotalSpan = document.getElementById('cart-total');
+        const clearCartBtn = document.getElementById('clear-cart');
+
+        // --- ESTADO DEL CARRITO ---
+        let cartId = null;
+
+        // --- FUNCIONES DEL CARRITO ---
+        const renderCart = (cartData) => {
+            cartItemsList.innerHTML = '';
+            let total = 0;
+
+            if (cartData && cartData.products && cartData.products.length > 0) {
+                cartData.products.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.textContent = `${item.productId.title} (x${item.quantity})`;
+                    const spanPrice = document.createElement('span');
+                    const itemSubtotal = item.productId.price * item.quantity;
+                    spanPrice.textContent = `$${itemSubtotal.toFixed(2)}`;
+                    li.appendChild(spanPrice);
+                    cartItemsList.appendChild(li);
+                    total += itemSubtotal;
+                });
+            } else {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = 'El carrito está vacío.';
+                cartItemsList.appendChild(li);
+            }
+            cartTotalSpan.textContent = total.toFixed(2);
+        };
+
+        const fetchAndRenderCart = async () => {
+            if (!cartId) return;
+            try {
+                const response = await fetch(`/api/carts/${cartId}`);
+                if (!response.ok) throw new Error('No se pudo obtener el carrito.');
+
+                const cartData = await response.json();
+                renderCart(cartData);
+            } catch (error) {
+                console.error('Error al cargar el carrito:', error);
+                renderCart(null); // Renderiza el carrito como vacío en caso de error
+            }
+        };
+
+        const initializeCart = async () => {
+            cartId = localStorage.getItem('cartId')
+            if (!cartId) {
+                try {
+                    const response = await fetch('/api/carts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ products: [] }) });
+                    if (!response.ok) throw new Error('La respuesta de la red no fue exitosa');
+
+                    const data = await response.json();
+                    cartId = data._id;
+                    localStorage.setItem('cartId', cartId);
+                    console.log('Nuevo carrito creado con ID:', cartId);
+                } catch (error) {
+                    console.error('Error al crear un nuevo carrito:', error);
+                    alert('No se pudo inicializar el carrito. Por favor, recargue la página.');
+                    return;
+                }
+            } else {
+                console.log('Carrito existente encontrado con ID:', cartId);
+            }
+            await fetchAndRenderCart();
+        };
+
+        // --- MANEJADORES DE EVENTOS ---
+
+        // Manejar clics en la lista de productos (Agregar al carrito y Ver detalles)
+        productList.addEventListener('click', async (e) => {
+            const target = e.target;
+
+            // Lógica para Agregar al Carrito
+            if (target.classList.contains('add-to-cart')) {
+                const productId = target.dataset.id;
+                if (!cartId) {
+                    alert('El carrito no se ha inicializado. Intente de nuevo.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/carts/${cartId}/product/${productId}`, { method: 'POST' });
+                    if (!response.ok) throw new Error('No se pudo agregar el producto.');
+                    alert('Producto agregado al carrito!');
+                    await fetchAndRenderCart();
+                } catch (error) {
+                    console.error('Error al agregar producto al carrito:', error);
+                    alert('Error al agregar el producto.');
+                }
+            }
+
+            // Lógica para Ver Detalles en el Modal
+            if (target.classList.contains('view-details')) {
+                const productId = target.dataset.id;
+                const modalContent = document.getElementById('product-details-content');
+                console.log(productId)
+
+                modalContent.innerHTML = `<div class="text-center"><div class="spinner-border" role="status"><span class="sr-only">Cargando...</span></div></div>`;
+
+                try {
+                    const response = await fetch(`/api/products/${productId}`);
+                    if (!response.ok) throw new Error('Producto no encontrado o error en el servidor.');
+
+                    const product = await response.json();
+
+                    modalContent.innerHTML = `
+                    <h4>${product.title}</h4>
+                    <p>${product.description}</p>
+                    <hr>
+                    <ul class="list-unstyled">
+                        <li><strong>Categoría:</strong> ${product.category}</li>
+                        <li><strong>Código:</strong> ${product.code}</li>
+                        <li>
+                            <strong>Disponibilidad:</strong> ${product.stock}                       
+                        </li>
+                    </ul>
+                    <div class="text-right mt-3">
+                        <h5 class="font-weight-bold">Precio: $${product.price}</h5>
+                    </div>
+                `;
+                } catch (error) {
+                    console.error('Error al obtener los detalles del producto:', error);
+                    modalContent.innerHTML = `<p class="text-danger">No se pudieron cargar los detalles del producto. Por favor, intente más tarde.</p>`;
+                }
+            }
+        });
+
+        // Vaciar el carrito
+        clearCartBtn.addEventListener('click', async () => {
+            if (!cartId) return;
+
+            try {
+                const response = await fetch(`/api/carts/${cartId}/products`, { method: 'DELETE' });
+                if (!response.ok) throw new Error('No se pudo vaciar el carrito.');
+
+                alert('El carrito ha sido vaciado.');
+                await fetchAndRenderCart();
+            } catch (error) {
+                console.error('Error al vaciar el carrito:', error);
+                alert('Error al vaciar el carrito.');
+            }
+        });
+
+        // --- INICIALIZACIÓN ---
+        initializeCart();
+
+        // Manejar el envío del formulario de filtros
+        filterForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(filterForm);
+            const queryParams = new URLSearchParams(formData).toString();
+            console.log(queryParams)
+
+            try {
+                const response = await fetch(`/api/products?${queryParams}`);
+                const data = await response.json();
+
+                console.log(data);
+
+                // Re-renderizar la lista de productos
+                productList.innerHTML = '';
+                data.payload.forEach(product => {
+                    const productDiv = document.createElement('div');
+                    productDiv.className = 'col-md-6 mb-4';
+                    productDiv.innerHTML = `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">${product.title}</h5>
+                            <p class="card-text">${product.description}</p>
+                            <p class="card-text"><strong>Precio:</strong> $${product.price}</p>
+                            <button class="btn btn-success add-to-cart" data-id="${product._id}">Agregar al Carrito</button>
+                            <button class="btn btn-info view-details" data-id="${product._id}" data-toggle="modal" data-target="#productModal">Ver Detalles</button>
+                        </div>
+                    </div>
+                `;
+                    productList.appendChild(productDiv);
+                });
+
+            } catch (error) {
+                console.error('Error al filtrar productos:', error);
+            }
+        });
+
     });
 </script>

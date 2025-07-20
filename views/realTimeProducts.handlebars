@@ -220,7 +220,7 @@
     socket.on('productDeleted', (data) => {
         console.log('Producto eliminado:', data);
         renderProducts(data.allProducts);
-        showNotification(`Producto "${data.product.title}" eliminado exitosamente`, 'warning');
+        showNotification(`Producto ${data.product.title} eliminado exitosamente`, 'warning');
     });
 
     socket.on('productCreated', (data) => {
@@ -252,7 +252,7 @@
             price: parseFloat(formData.get('price')),
             stock: parseInt(formData.get('stock')),
             category: formData.get('category'),
-            thumbnail: formData.get('thumbnail'),
+            thumbnails: [formData.get('thumbnails')],
             status: formData.get('status') === 'true'
         };
 
@@ -289,7 +289,7 @@
                         <div class="row mb-3">
                             <div class="col-8">
                                 <span class="badge bg-success price-badge">
-                                    <i class="fas fa-dollar-sign"></i> $${product.price}
+                                    <i class="fas fa-dollar-sign"></i> ${product.price}
                                 </span>
                             </div>
                             <div class="col-4 text-end">
@@ -339,9 +339,9 @@
                     </div>
                     <div class="card-footer bg-light d-flex justify-content-between align-items-center">
                         <small class="text-muted">
-                            <i class="fas fa-hashtag"></i> ID: ${product.id}
+                            <i class="fas fa-hashtag"></i> ID: ${product._id.toString()}
                         </small>
-                        <button class="btn btn-danger btn-sm" onclick="deleteProduct(${product.id})">
+                        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${product._id.toString()}')">
                             <i class="fas fa-trash"></i> Eliminar
                         </button>
                     </div>
@@ -353,9 +353,10 @@
 
     // Función para eliminar producto
     function deleteProduct(productId) {
+        console.log("Entra a la funcion")
         if (confirm('¿Estás seguro de que deseas eliminar este producto?')) {
             console.log('Eliminando producto:', productId);
-            socket.emit('deleteProduct', parseInt(productId));
+            socket.emit('deleteProduct', productId);
         }
     }
 
